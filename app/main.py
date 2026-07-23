@@ -6,10 +6,10 @@ from .agent import ask_agent,ingest_document
 from .schemas import (
     ChatRequest,
     ChatResponse,DocumentUploadResponse
-
-
-
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 app = FastAPI(
@@ -78,9 +78,12 @@ def chat(request: ChatRequest) -> ChatResponse:
             detail=str(error),
         ) from error
 
+
     except Exception as error:
+        logger.exception("Agent failed while processing /chat")
+
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail="The agent failed to process the question.",
         ) from error
 
