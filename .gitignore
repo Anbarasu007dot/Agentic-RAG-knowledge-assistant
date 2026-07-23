@@ -18,6 +18,7 @@ frontend/dist/
 chroma_db/
 documents/*
 !documents/.gitkeep
+!documents/sample.txt
 
 # IDE files
 .idea/
