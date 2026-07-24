@@ -4,14 +4,19 @@ import ChatWindow from './components/ChatWindow'
 import DocumentUpload from './components/DocumentUpload'
 import './App.css'
 
+function createId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
 function App() {
-  const [threadId] = useState(() => crypto.randomUUID())
+  const [threadId] = useState(createId)
   const [messages, setMessages] = useState([])
   const [isReplying, setIsReplying] = useState(false)
   const [chatError, setChatError] = useState('')
 
   const handleSend = async (question) => {
-    const userMessage = { id: crypto.randomUUID(), role: 'user', content: question }
+    const userMessage = { id: createId(), role: 'user', content: question }
 
     setMessages((current) => [...current, userMessage])
     setChatError('')
@@ -21,10 +26,10 @@ function App() {
       const response = await sendChatMessage(question, threadId)
       setMessages((current) => [
         ...current,
-        { id: crypto.randomUUID(), role: 'assistant', content: response.answer },
+        { id: createId(), role: 'assistant', content: response.answer },
       ])
     } catch (error) {
-      setChatError(error.message)
+      setChatError(error instanceof Error ? error.message : 'Unable to send the question.')
     } finally {
       setIsReplying(false)
     }

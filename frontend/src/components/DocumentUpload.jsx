@@ -41,7 +41,7 @@ function DocumentUpload() {
       const data = await uploadDocument(file)
       setResult(data)
     } catch (uploadError) {
-      setError(uploadError.message)
+      setError(uploadError instanceof Error ? uploadError.message : 'Unable to upload the document.')
     } finally {
       setIsUploading(false)
     }

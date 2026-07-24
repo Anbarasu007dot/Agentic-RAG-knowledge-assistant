@@ -331,6 +331,14 @@
   background: #f9e9e4;
 }
 
+.app-error {
+  margin-top: 40px;
+}
+
+.app-error p {
+  margin-bottom: 0;
+}
+
 .notice-icon {
   font-weight: 700;
 }

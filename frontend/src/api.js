@@ -1,6 +1,21 @@
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
+function getErrorMessage(data, status) {
+  const detail = data?.detail
+
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => item?.msg || item?.message)
+      .filter(Boolean)
+      .join(' ')
+  }
+
+  return data?.message || `Request failed with status ${status}.`
+}
+
 async function parseResponse(response) {
   let data
 
@@ -11,12 +26,7 @@ async function parseResponse(response) {
   }
 
   if (!response.ok) {
-    const detail = data?.detail
-    const message =
-      typeof detail === 'string'
-        ? detail
-        : data?.message || `Request failed with status ${response.status}.`
-    throw new Error(message)
+    throw new Error(getErrorMessage(data, response.status))
   }
 
   return data
@@ -42,6 +52,9 @@ export async function sendChatMessage(question, threadId) {
     throw error
   }
 }
+
+// Keep both names available so existing and older components remain compatible.
+export const askQuestion = sendChatMessage
 
 export async function uploadDocument(file) {
   const formData = new FormData()
