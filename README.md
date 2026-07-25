@@ -9,11 +9,11 @@ Live Demo
 
 Frontend:
 
-https://your-netlify-url.netlify.app
+https://agentic-rag-knowledge-assistant.netlify.app
 
 Backend:
 
-https://your-render-url.onrender.com
+https://agentic-rag-knowledge-assistant-z1xx.onrender.com
 
 Features
  Upload multiple document formats (TXT, PDF, DOCX)
