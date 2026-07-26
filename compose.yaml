@@ -1,0 +1,66 @@
+services:
+  backend:
+    build:
+      context: .
+    container_name: rag-backend
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    develop:
+      watch:
+        # Sync FastAPI source code
+        - action: sync
+          path: ./app
+          target: /app/app
+
+        # Sync documents
+        - action: sync
+          path: ./documents
+          target: /app/documents
+
+        # Rebuild if dependencies change
+        - action: rebuild
+          path: requirements.txt
+
+        # Rebuild if Dockerfile changes
+        - action: rebuild
+          path: Dockerfile
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: rag-frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - backend
+
+    restart: unless-stopped
+
+    develop:
+      watch:
+        # Sync React source
+        - action: sync
+          path: ./frontend/src
+          target: /app/src
+
+        # Sync public folder
+        - action: sync
+          path: ./frontend/public
+          target: /app/public
+
+        # Rebuild if package.json changes
+        - action: rebuild
+          path: ./frontend/package.json
+
+        # Rebuild if Dockerfile changes
+        - action: rebuild
+          path: ./frontend/Dockerfile
