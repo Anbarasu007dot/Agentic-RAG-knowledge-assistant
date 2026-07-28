@@ -202,6 +202,20 @@ def ingest_document(file_path: Path) -> int:
     return len(new_chunks)
 
 
+def delete_document_chunks(file_path: Path) -> int:
+    """Delete all vector chunks associated with a stored document."""
+    matches = vectorstore.get(
+        where={"source": str(file_path)},
+        include=[],
+    )
+    chunk_ids = matches.get("ids", [])
+
+    if chunk_ids:
+        vectorstore.delete(ids=chunk_ids)
+
+    return len(chunk_ids)
+
+
 # ---------------------------------------------------------
 # Gemini chat model
 # ---------------------------------------------------------

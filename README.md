@@ -34,9 +34,28 @@ Conversation memory for contextual chat
 
  Fully deployed frontend and backend
 
- Real-time document indexing after upload
+Real-time document indexing after upload
 
- Source-aware responses based on uploaded documents
+Source-aware responses based on uploaded documents
+
+PostgreSQL-backed document and conversation history
+
+PostgreSQL
+
+Copy `.env.example` to `.env` and set `GOOGLE_API_KEY`. When the application is
+started with Docker Compose, PostgreSQL is created automatically and the schema
+in `sql/schema.sql` is applied on first startup. The backend also runs the
+idempotent schema at startup, so existing databases receive any missing tables
+or indexes.
+
+The persistence API includes:
+
+- `GET /documents`
+- `DELETE /documents/{document_id}`
+- `GET /chat/sessions`
+- `GET /chat/sessions/{session_id}/messages`
+
+Chat requests and document upload status are persisted automatically.
 
 Tech Stack
 Backend
