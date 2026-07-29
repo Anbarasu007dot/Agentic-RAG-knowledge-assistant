@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import ChatMessage from './ChatMessage'
 
-function ChatWindow({ messages, isReplying, error, onSend }) {
+function ChatWindow({
+  messages, isReplying, error, onSend, sessions, activeSessionId,
+  sessionsLoading, sessionsError, historyLoading, onSelectSession,
+  onNewChat, onRetrySessions,
+}) {
   const [question, setQuestion] = useState('')
   const messagesEndRef = useRef(null)
 
@@ -27,7 +31,45 @@ function ChatWindow({ messages, isReplying, error, onSend }) {
         </div>
       </div>
 
+      <section className="chat-history" aria-label="Previous chats">
+        <div className="history-heading">
+          <strong>Previous chats</strong>
+          <button type="button" className="new-chat-button" onClick={onNewChat} disabled={isReplying || historyLoading}>
+            + New Chat
+          </button>
+        </div>
+        {sessionsError && (
+          <div className="history-error" role="alert">
+            <span>{sessionsError}</span>
+            <button type="button" className="text-button" onClick={onRetrySessions}>Retry</button>
+          </div>
+        )}
+        {sessionsLoading ? (
+          <p className="history-state" role="status">Loading chats…</p>
+        ) : sessions.length === 0 ? (
+          <p className="history-state">No previous chats yet.</p>
+        ) : (
+          <div className="session-list">
+            {sessions.map((session) => (
+              <button
+                type="button"
+                key={session.id}
+                className={`session-item ${session.id === activeSessionId ? 'active' : ''}`}
+                onClick={() => onSelectSession(session.id)}
+                disabled={historyLoading || isReplying}
+                aria-pressed={session.id === activeSessionId}
+                title={session.id}
+              >
+                <span>{session.id.slice(0, 8)}</span>
+                <small>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(session.updated_at))}</small>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
       <div className="messages" aria-live="polite">
+        {historyLoading && <p className="history-loading" role="status">Loading conversation…</p>}
         {messages.length === 0 && (
           <div className="empty-chat">
             <span className="empty-mark" aria-hidden="true">✦</span>

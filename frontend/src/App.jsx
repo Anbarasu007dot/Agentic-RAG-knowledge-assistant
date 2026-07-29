@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { sendChatMessage } from './api'
+import { useCallback, useEffect, useState } from 'react'
+import { fetchChatSessions, fetchSessionMessages, sendChatMessage } from './api'
 import ChatWindow from './components/ChatWindow'
 import DocumentUpload from './components/DocumentUpload'
 import './App.css'
@@ -10,10 +10,57 @@ function createId() {
 }
 
 function App() {
-  const [threadId] = useState(createId)
+  const [threadId, setThreadId] = useState(createId)
   const [messages, setMessages] = useState([])
+  const [sessions, setSessions] = useState([])
+  const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [sessionsError, setSessionsError] = useState('')
+  const [historyLoading, setHistoryLoading] = useState(false)
   const [isReplying, setIsReplying] = useState(false)
   const [chatError, setChatError] = useState('')
+
+  const loadSessions = useCallback(async () => {
+    setSessionsLoading(true)
+    setSessionsError('')
+    try {
+      setSessions(await fetchChatSessions())
+    } catch (error) {
+      setSessionsError(error instanceof Error ? error.message : 'Unable to load previous chats.')
+    } finally {
+      setSessionsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timeoutId = setTimeout(loadSessions, 0)
+    return () => clearTimeout(timeoutId)
+  }, [loadSessions])
+
+  const handleSelectSession = async (sessionId) => {
+    if (historyLoading || isReplying || sessionId === threadId) return
+    setHistoryLoading(true)
+    setChatError('')
+    try {
+      const history = await fetchSessionMessages(sessionId)
+      setMessages(history.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+      })))
+      setThreadId(sessionId)
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : 'Unable to load this chat.')
+    } finally {
+      setHistoryLoading(false)
+    }
+  }
+
+  const handleNewChat = () => {
+    if (isReplying || historyLoading) return
+    setThreadId(createId())
+    setMessages([])
+    setChatError('')
+  }
 
   const handleSend = async (question) => {
     const userMessage = { id: createId(), role: 'user', content: question }
@@ -28,6 +75,7 @@ function App() {
         ...current,
         { id: createId(), role: 'assistant', content: response.answer },
       ])
+      await loadSessions()
     } catch (error) {
       setChatError(error instanceof Error ? error.message : 'Unable to send the question.')
     } finally {
@@ -67,6 +115,14 @@ function App() {
           isReplying={isReplying}
           error={chatError}
           onSend={handleSend}
+          sessions={sessions}
+          activeSessionId={threadId}
+          sessionsLoading={sessionsLoading}
+          sessionsError={sessionsError}
+          historyLoading={historyLoading}
+          onSelectSession={handleSelectSession}
+          onNewChat={handleNewChat}
+          onRetrySessions={loadSessions}
         />
       </section>
 

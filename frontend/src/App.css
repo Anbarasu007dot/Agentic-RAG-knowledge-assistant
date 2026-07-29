@@ -260,6 +260,142 @@
   font-weight: 600;
 }
 
+.document-library {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #ebeae4;
+}
+
+.library-heading,
+.history-heading,
+.history-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.library-heading h3,
+.history-heading strong {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+}
+
+.text-button {
+  padding: 3px;
+  border: 0;
+  color: var(--forest);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.text-button.danger,
+.delete-button {
+  color: #8a3d2e;
+}
+
+.library-state,
+.history-state,
+.history-loading {
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.document-list {
+  max-height: 235px;
+  margin: 10px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.document-item {
+  position: relative;
+  padding: 10px 28px 10px 0;
+  border-bottom: 1px solid #ebeae4;
+}
+
+.document-summary strong,
+.document-summary > span {
+  display: block;
+}
+
+.document-summary strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-summary > span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.document-summary .status-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: var(--forest);
+  background: var(--forest-light);
+  text-transform: capitalize;
+}
+
+.document-summary .status-badge.failed {
+  color: #8a3d2e;
+  background: #f9e9e4;
+}
+
+.document-summary .status-badge.processing {
+  color: #8a562e;
+  background: #f8e8de;
+}
+
+.delete-button {
+  position: absolute;
+  top: 9px;
+  right: 0;
+  width: 25px;
+  height: 25px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-size: 18px;
+}
+
+.delete-button:hover {
+  background: #f9e9e4;
+}
+
+.delete-confirmation {
+  margin-top: 9px;
+  padding: 9px;
+  border-radius: 7px;
+  background: #f9e9e4;
+}
+
+.delete-confirmation p {
+  margin: 0 0 6px;
+  color: #704236;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.delete-confirmation div {
+  display: flex;
+  gap: 10px;
+}
+
+.notice.compact {
+  margin-top: 9px;
+  padding: 8px;
+}
+
 .secondary-button {
   display: flex;
   align-items: center;
@@ -360,8 +496,69 @@
   border-bottom: 1px solid #ebeae4;
 }
 
+.chat-history {
+  padding: 14px 3px;
+  border-bottom: 1px solid #ebeae4;
+}
+
+.new-chat-button {
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--forest);
+  background: #faf9f4;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.session-list {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.session-item {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: #faf9f4;
+  text-align: left;
+}
+
+.session-item.active {
+  border-color: var(--forest);
+  background: var(--forest-light);
+}
+
+.session-item span,
+.session-item small {
+  display: block;
+}
+
+.session-item span {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.session-item small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 8px;
+}
+
+.history-error {
+  margin-top: 9px;
+  color: #8a3d2e;
+  font-size: 9px;
+}
+
 .messages {
-  height: 277px;
+  height: 245px;
   overflow-y: auto;
   padding: 20px 3px;
   scrollbar-width: thin;

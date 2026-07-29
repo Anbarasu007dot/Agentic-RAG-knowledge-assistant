@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react'
-import { uploadDocument } from '../api'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { deleteDocument, fetchDocuments, uploadDocument } from '../api'
 
 const ALLOWED_EXTENSIONS = ['txt', 'pdf', 'docx']
 
@@ -9,6 +9,29 @@ function DocumentUpload() {
   const [isUploading, setIsUploading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [documents, setDocuments] = useState([])
+  const [documentsLoading, setDocumentsLoading] = useState(true)
+  const [documentsError, setDocumentsError] = useState('')
+  const [confirmingId, setConfirmingId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+  const [deleteNotice, setDeleteNotice] = useState('')
+
+  const loadDocuments = useCallback(async () => {
+    setDocumentsLoading(true)
+    setDocumentsError('')
+    try {
+      setDocuments(await fetchDocuments())
+    } catch (loadError) {
+      setDocumentsError(loadError instanceof Error ? loadError.message : 'Unable to load documents.')
+    } finally {
+      setDocumentsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timeoutId = setTimeout(loadDocuments, 0)
+    return () => clearTimeout(timeoutId)
+  }, [loadDocuments])
 
   const chooseFile = (selectedFile) => {
     setResult(null)
@@ -40,12 +63,35 @@ function DocumentUpload() {
     try {
       const data = await uploadDocument(file)
       setResult(data)
+      await loadDocuments()
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : 'Unable to upload the document.')
     } finally {
       setIsUploading(false)
     }
   }
+
+  const handleDelete = async (document) => {
+    if (deletingId !== null) return
+    setDeletingId(document.id)
+    setDocumentsError('')
+    setDeleteNotice('')
+    try {
+      await deleteDocument(document.id)
+      setDocuments((current) => current.filter((item) => item.id !== document.id))
+      setConfirmingId(null)
+      setDeleteNotice(`${document.filename} was deleted.`)
+    } catch (deleteError) {
+      setDocumentsError(deleteError instanceof Error ? deleteError.message : 'Unable to delete the document.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const formatDate = (value) => new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
 
   return (
     <article className="panel upload-panel">
@@ -122,6 +168,47 @@ function DocumentUpload() {
         {isUploading ? 'Indexing…' : 'Upload & index'}
         {!isUploading && <span aria-hidden="true">→</span>}
       </button>
+
+      <section className="document-library" aria-labelledby="document-library-title">
+        <div className="library-heading">
+          <h3 id="document-library-title">Your documents</h3>
+          <button type="button" className="text-button" onClick={loadDocuments} disabled={documentsLoading}>
+            Refresh
+          </button>
+        </div>
+        {deleteNotice && <div className="notice success compact" role="status">{deleteNotice}</div>}
+        {documentsError && <div className="notice error compact" role="alert">{documentsError}</div>}
+        {documentsLoading ? (
+          <p className="library-state" role="status">Loading documents…</p>
+        ) : documents.length === 0 ? (
+          <p className="library-state">No uploaded documents yet.</p>
+        ) : (
+          <ul className="document-list">
+            {documents.map((document) => (
+              <li key={document.id} className="document-item">
+                <div className="document-summary">
+                  <strong title={document.filename}>{document.filename}</strong>
+                  <span>{document.source_type?.toUpperCase() || 'DOCUMENT'} · {formatDate(document.upload_time)}</span>
+                  <span className={`status-badge ${document.status}`}>{document.status}</span>
+                </div>
+                {confirmingId === document.id ? (
+                  <div className="delete-confirmation" role="alertdialog" aria-label={`Delete ${document.filename}`}>
+                    <p>Delete its metadata, uploaded file, and ChromaDB vectors?</p>
+                    <div>
+                      <button type="button" className="text-button danger" onClick={() => handleDelete(document)} disabled={deletingId === document.id}>
+                        {deletingId === document.id ? 'Deleting…' : 'Delete'}
+                      </button>
+                      <button type="button" className="text-button" onClick={() => setConfirmingId(null)} disabled={deletingId === document.id}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button type="button" className="delete-button" aria-label={`Delete ${document.filename}`} onClick={() => setConfirmingId(document.id)} disabled={deletingId !== null}>×</button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </article>
   )
 }
