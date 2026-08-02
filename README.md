@@ -292,7 +292,24 @@ To stop the containers and remove their stored volumes:
 docker compose down -v
 ```
 
-> Using `-v` removes persisted PostgreSQL and ChromaDB data.
+> Using `-v` removes persisted PostgreSQL and ChromaDB data.## Running Tests
+
+This project includes backend tests for validating core FastAPI API flows.
+
+The test suite uses:
+
+- `pytest` for running tests
+- `FastAPI TestClient` for testing API endpoints
+- Mocking to avoid real calls to external services such as Gemini/LLM APIs
+- Mocking database functions where required, so selected API tests can run without depending on a live PostgreSQL connection
+
+### Run Tests
+
+From the backend project root, run:
+
+```bash
+python -m pytest -v
+```
 
 ---
 
